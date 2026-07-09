@@ -34,6 +34,19 @@ github-to-jira-comment \
   --jira-url https://yg-hpw.atlassian.net/browse/WRAPX-388
 ```
 
+## Release cycle
+
+1. Work from an issue branch and open a draft PR linked to the issue.
+2. Run `bundle exec rspec`, `bin/github-to-jira-comment --help`, and `gem build marlens-github-to-jira-comment.gemspec`.
+3. Delete the generated `.gem` file after the build check.
+4. Mark the PR ready, merge it to `main`, then update local `main`.
+5. Build the release artifact from `main` with `gem build marlens-github-to-jira-comment.gemspec`.
+6. Publish with `gem push marlens-github-to-jira-comment-<version>.gem`.
+7. Tag the release as `v<version>` and create the GitHub release.
+8. Verify RubyGems lists the version with `gem list --remote marlens-github-to-jira-comment --exact --all`.
+9. Install the published gem in a temporary `GEM_HOME` and smoke-check `github-to-jira-comment --help`.
+10. Delete the local `.gem` artifact after verification.
+
 ## MVP scope
 
 1. Accept a full GitHub pull request URL or GitHub issue URL.
