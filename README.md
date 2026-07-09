@@ -1,6 +1,6 @@
 # GitHub to Jira Comment
 
-Small Ruby CLI/gem concept for copying a GitHub issue or pull request body into a Jira issue comment with rich Jira formatting.
+Small Ruby CLI/gem for copying a GitHub issue or pull request body into a Jira issue comment with rich Jira formatting.
 
 ## Required contract
 
@@ -12,13 +12,26 @@ github-to-jira-comment \
   --jira-url https://yg-hpw.atlassian.net/browse/WRAPX-388
 ```
 
-Credentials come from environment variables:
+Credentials come from environment variables. `JIRA_BASE_URL` is optional; the CLI derives it from `--jira-url` unless you override it.
 
 ```bash
 GITHUB_TOKEN=...
-JIRA_BASE_URL=https://yg-hpw.atlassian.net
 JIRA_EMAIL=...
 JIRA_API_TOKEN=...
+```
+
+## Install
+
+```ruby
+gem "marlens-github-to-jira-comment", "~> 0.1"
+```
+
+## CLI
+
+```bash
+github-to-jira-comment \
+  --github-url https://github.com/icefoganalytics/wrap/pull/405 \
+  --jira-url https://yg-hpw.atlassian.net/browse/WRAPX-388
 ```
 
 ## MVP scope
