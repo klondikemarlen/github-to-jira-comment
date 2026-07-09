@@ -23,13 +23,12 @@ module Marlens
 
       def resolve_with_metadata(markdown, context: nil)
         images = image_occurrences(markdown)
-        return Result.new(markdown:, allowed_image_hosts: []) unless images.any? { |image| github_user_attachment?(image.url) }
+        attachment_images = images.select { |image| github_user_attachment?(image.url) }
+        return Result.new(markdown:, allowed_image_hosts: []) if attachment_images.empty?
 
-        rendered_images = rendered_image_urls(render_markdown(markdown, context:))
+        rendered_images = rendered_image_urls(render_markdown(markdown, context:)).select { |url| rendered_attachment?(url) }
         mappings = {}
-        images.each_with_index do |image, index|
-          next unless github_user_attachment?(image.url)
-
+        attachment_images.each_with_index do |image, index|
           rendered = rendered_images[index] || mappings[image.url]
           raise "GitHub Markdown render did not return an image for #{image.url}" unless rendered
 
@@ -114,6 +113,13 @@ module Marlens
         attributes.scan(/([a-zA-Z:-]+)=["']([^"']+)["']/).to_h
       end
 
+
+      def rendered_attachment?(url)
+        uri = URI.parse(url)
+        uri.host == "private-user-images.githubusercontent.com" || github_user_attachment?(url)
+      rescue URI::InvalidURIError
+        false
+      end
       def github_user_attachment?(url)
         uri = URI.parse(url)
         uri.scheme == "https" && uri.host == "github.com" && uri.path.start_with?("/user-attachments/assets/")

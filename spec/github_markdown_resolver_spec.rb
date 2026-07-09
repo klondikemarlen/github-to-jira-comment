@@ -52,6 +52,24 @@ RSpec.describe Marlens::GithubToJiraComment::GithubMarkdownResolver do
     MARKDOWN
   end
 
+  it "does not let earlier non-attachment images shift attachment resolution" do
+    markdown = <<~MARKDOWN
+      ![Logo](https://example.com/logo.png)
+      ![Screenshot](https://github.com/user-attachments/assets/md123)
+    MARKDOWN
+    renderer = RecordingMarkdownRenderer.new(<<~HTML)
+      <p><img src="https://example.com/logo.png"></p>
+      <p><img src="https://private-user-images.githubusercontent.com/md-rendered"></p>
+    HTML
+
+    resolved = described_class.new(renderer: renderer).resolve(markdown)
+
+    expect(resolved).to eq(<<~MARKDOWN)
+      ![Logo](https://example.com/logo.png)
+      ![Screenshot](https://private-user-images.githubusercontent.com/md-rendered)
+    MARKDOWN
+  end
+
   it "replaces every duplicate occurrence of a resolved image URL" do
     markdown = <<~MARKDOWN
       ![first](https://github.com/user-attachments/assets/dup123)
