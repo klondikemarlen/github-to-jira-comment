@@ -1,0 +1,17 @@
+{
+  "github_url": "https://github.com/icefoganalytics/wrap/pull/405",
+  "jira_url": "https://yg-hpw.atlassian.net/browse/WRAPX-388",
+  "jira_comment_id": "69213",
+  "created": "2026-07-09T11:42:26.501-0700",
+  "verified": {
+    "heading_count": 6,
+    "ordered_list_count": 4,
+    "fixes_link": "https://yg-hpw.atlassian.net/browse/WRAPX-388",
+    "markers": [
+      "fixes",
+      "context",
+      "implementation",
+      "testing"
+    ]
+  }
+}
