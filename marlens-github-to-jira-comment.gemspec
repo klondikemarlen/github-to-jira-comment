@@ -14,7 +14,14 @@ Gem::Specification.new do |spec|
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.2"
 
-  spec.files = Dir["lib/**/*.rb", "README.md", "LICENSE.txt"]
+  spec.metadata["homepage_uri"] = spec.homepage
+  spec.metadata["source_code_uri"] = spec.homepage
+
+  spec.files = Dir.chdir(__dir__) do
+    Dir["lib/**/*.rb", "bin/*", "README.md", "LICENSE.txt"]
+  end
+  spec.bindir = "bin"
+  spec.executables = ["github-to-jira-comment"]
   spec.require_paths = ["lib"]
 
   spec.add_dependency "marlens-jira-api", "~> 0.5"
