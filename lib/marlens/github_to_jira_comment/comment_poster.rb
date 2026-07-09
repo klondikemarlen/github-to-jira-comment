@@ -3,7 +3,7 @@
 module Marlens
   module GithubToJiraComment
     class CommentPoster
-      DEFAULT_IMAGE_HOSTS = ["private-user-images.githubusercontent.com"].freeze
+      DEFAULT_IMAGE_HOSTS = ["github.com", "private-user-images.githubusercontent.com", "user-images.githubusercontent.com"].freeze
 
       def initialize(jira_client:)
         @jira_client = jira_client
@@ -18,10 +18,11 @@ module Marlens
       end
 
       def create(issue_key:, markdown:, allowed_image_hosts: [])
+        hosts = (DEFAULT_IMAGE_HOSTS + allowed_image_hosts).uniq
         @jira_client.create_markdown_comment(
           issue_key:,
           markdown:,
-          allowed_image_hosts:,
+          allowed_image_hosts: hosts,
           strict_images: true,
           image_upload_failures: []
         )
