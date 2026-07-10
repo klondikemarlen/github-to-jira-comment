@@ -28,8 +28,8 @@ module Marlens
 
         rendered_images = rendered_image_urls(render_markdown(markdown, context:)).select { |url| rendered_attachment?(url) }
         mappings = {}
-        attachment_images.each_with_index do |image, index|
-          rendered = rendered_images[index] || mappings[image.url]
+        attachment_images.each do |image|
+          rendered = mappings[image.url] || rendered_images.find { |url| url.include?(github_attachment_id(image.url)) }
           raise "GitHub Markdown render did not return an image for #{image.url}" unless rendered
 
           mappings[image.url] ||= rendered
@@ -125,6 +125,10 @@ module Marlens
         uri.scheme == "https" && uri.host == "github.com" && uri.path.start_with?("/user-attachments/assets/")
       rescue URI::InvalidURIError
         false
+      end
+
+      def github_attachment_id(url)
+        URI.parse(url).path.split("/").last
       end
 
       def host(url)
