@@ -39,16 +39,16 @@ RSpec.describe Marlens::GithubToJiraComment::GithubMarkdownResolver do
       <img alt="Inline" src="https://github.com/user-attachments/assets/html123">
     MARKDOWN
     renderer = RecordingMarkdownRenderer.new(<<~HTML)
-      <p><img src="https://private-user-images.githubusercontent.com/md-rendered"></p>
-      <p><img src="https://private-user-images.githubusercontent.com/html-rendered"></p>
+      <p><img src="https://private-user-images.githubusercontent.com/md123-rendered"></p>
+      <p><img src="https://private-user-images.githubusercontent.com/html123-rendered"></p>
     HTML
 
     resolved = described_class.new(renderer: renderer).resolve(markdown)
 
     expect(renderer.markdowns).to eq([markdown])
     expect(resolved).to eq(<<~MARKDOWN)
-      ![Screenshot](https://private-user-images.githubusercontent.com/md-rendered)
-      <img alt="Inline" src="https://private-user-images.githubusercontent.com/html-rendered">
+      ![Screenshot](https://private-user-images.githubusercontent.com/md123-rendered)
+      <img alt="Inline" src="https://private-user-images.githubusercontent.com/html123-rendered">
     MARKDOWN
   end
 
@@ -59,14 +59,52 @@ RSpec.describe Marlens::GithubToJiraComment::GithubMarkdownResolver do
     MARKDOWN
     renderer = RecordingMarkdownRenderer.new(<<~HTML)
       <p><img src="https://example.com/logo.png"></p>
-      <p><img src="https://private-user-images.githubusercontent.com/md-rendered"></p>
+      <p><img src="https://private-user-images.githubusercontent.com/md123-rendered"></p>
     HTML
 
     resolved = described_class.new(renderer: renderer).resolve(markdown)
 
     expect(resolved).to eq(<<~MARKDOWN)
       ![Logo](https://example.com/logo.png)
-      ![Screenshot](https://private-user-images.githubusercontent.com/md-rendered)
+      ![Screenshot](https://private-user-images.githubusercontent.com/md123-rendered)
+    MARKDOWN
+  end
+
+  it "keeps a preceding private image from shifting attachment resolution" do
+    markdown = <<~MARKDOWN
+      ![Existing](https://private-user-images.githubusercontent.com/existing)
+      ![Screenshot](https://github.com/user-attachments/assets/new123)
+    MARKDOWN
+    renderer = RecordingMarkdownRenderer.new(<<~HTML)
+      <p><img src="https://private-user-images.githubusercontent.com/existing"></p>
+      <p><img src="https://private-user-images.githubusercontent.com/new123-rendered"></p>
+    HTML
+
+    resolved = described_class.new(renderer: renderer).resolve(markdown)
+
+    expect(resolved).to eq(<<~MARKDOWN)
+      ![Existing](https://private-user-images.githubusercontent.com/existing)
+      ![Screenshot](https://private-user-images.githubusercontent.com/new123-rendered)
+    MARKDOWN
+  end
+
+  it "resolves a distinct attachment after duplicate occurrences" do
+    markdown = <<~MARKDOWN
+      ![first](https://github.com/user-attachments/assets/dup123)
+      ![second](https://github.com/user-attachments/assets/dup123)
+      ![third](https://github.com/user-attachments/assets/other456)
+    MARKDOWN
+    renderer = RecordingMarkdownRenderer.new(<<~HTML)
+      <p><img src="https://private-user-images.githubusercontent.com/dup123-rendered"></p>
+      <p><img src="https://private-user-images.githubusercontent.com/other456-rendered"></p>
+    HTML
+
+    resolved = described_class.new(renderer: renderer).resolve(markdown)
+
+    expect(resolved).to eq(<<~MARKDOWN)
+      ![first](https://private-user-images.githubusercontent.com/dup123-rendered)
+      ![second](https://private-user-images.githubusercontent.com/dup123-rendered)
+      ![third](https://private-user-images.githubusercontent.com/other456-rendered)
     MARKDOWN
   end
 
@@ -76,12 +114,12 @@ RSpec.describe Marlens::GithubToJiraComment::GithubMarkdownResolver do
       ![second](https://github.com/user-attachments/assets/dup123)
     MARKDOWN
     renderer = RecordingMarkdownRenderer.new(<<~HTML)
-      <p><img src="https://private-user-images.githubusercontent.com/dup-rendered"></p>
+      <p><img src="https://private-user-images.githubusercontent.com/dup123-rendered"></p>
     HTML
 
     resolved = described_class.new(renderer: renderer).resolve(markdown)
 
-    expect(resolved.scan("https://private-user-images.githubusercontent.com/dup-rendered").size).to eq(2)
+    expect(resolved.scan("https://private-user-images.githubusercontent.com/dup123-rendered").size).to eq(2)
     expect(resolved).not_to include("https://github.com/user-attachments/assets/dup123")
   end
 end
